@@ -22,9 +22,11 @@ LABEL com.container.vendor="dunkelfrosch impersonate" \
 # setup some system required environment variables
 ENV TIMEZONE           "Europe/Berlin"
 ENV TERM                xterm-color
-ENV NCURSES_NO_UTF8_ACS 1
 ENV LC_ALL              C
 ENV LANG                en_US.UTF-8
+ENV NCURSES_NO_UTF8_ACS 1
+
+# setup some internal environment variables
 ENV _GOSU_VERSION       1.9
 
 # start processing as root
@@ -45,11 +47,7 @@ RUN set -e \
     && echo "${TIMEZONE}" >/etc/timezone \
     && dpkg-reconfigure tzdata >/dev/null 2>&1
 
-# x-layer 3: build script cleanUp related processor
-RUN set -e \
-    && sh /opt/docker/docker_cleanup_debian.sh
-
-# x-layer 4: install gosu (simple go-based setuid+setgid+setgroups+exec)
+# x-layer 3: install gosu (simple go-based setuid+setgid+setgroups+exec)
 RUN set -e \
   && gpg --keyserver pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
   && curl -sSL -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/${_GOSU_VERSION}/gosu-$(dpkg --print-architecture)" \
@@ -58,14 +56,19 @@ RUN set -e \
   && rm /usr/local/bin/gosu.asc \
   && chmod +x /usr/local/bin/gosu
 
-# x-layer 5: install required plugins
+# x-layer 4: install required plugins
 RUN set -e \
     && /usr/local/bin/install-plugins.sh durable-task:1.12 credentials:2.1.4 kubernetes:0.8
 
-# x-layer 6: provide new entrypoint
+# x-layer 5: provide new entrypoint
 COPY ./entrypoint.sh /opt/docker/entrypoint.sh
-# x-layer 7: remove executors in master
+
+# x-layer 6: remove executors in jenkins master
 COPY ./opt/docker/master-executors.groovy /usr/share/jenkins/ref/init.groovy.d/
+
+# x-layer 7: build script cleanUp related processor
+RUN set -e \
+    && sh /opt/docker/docker_cleanup_debian.sh
 
 #
 # -- EODEF --
