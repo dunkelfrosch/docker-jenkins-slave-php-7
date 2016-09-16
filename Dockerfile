@@ -5,27 +5,25 @@
 # OS/CORE  : debian:8
 # SERVICES : jenkins 2.7.3
 #
-# VERSION 0.9.5
+# VERSION 0.9.6
 #
 
-FROM jenkins:2.7.3
+FROM jenkins:2.7.4
 
 MAINTAINER Patrick Paechnatz <patrick.paechnatz@gmail.com>
 LABEL com.container.vendor="dunkelfrosch impersonate" \
       com.container.service="df/service/jenkins/php" \
       com.container.priority="1" \
       com.container.project="df-service-jenkins-php" \
-      img.version="0.9.5" \
+      img.version="0.9.6" \
       img.name="local/df/service/jenkins/php" \
       img.description="jenkins ci service image for dynamic slave build using kubernetes"
 
 # setup some system required environment variables
 ENV TIMEZONE           "Europe/Berlin"
 ENV TERM                xterm-color
+ENV LC_ALL              C
 ENV LANG                en_US.UTF-8
-ENV LANGUAGE            en_US.UTF-8
-ENV LC_ALL              en_US.UTF-8
-ENV LC_CTYPE            UTF-8
 ENV NCURSES_NO_UTF8_ACS 1
 
 # setup some internal environment variables
@@ -42,7 +40,7 @@ ADD https://raw.githubusercontent.com/dunkelfrosch/docker-bash/master/docker_cle
 
 # x-layer 1: package manager related processor
 RUN apt-get update -qq >/dev/null 2>&1 \
-    && apt-get install -qq -y --no-install-recommends mc wget curl ntp >/dev/null 2>&1
+    && apt-get install -qq -y --no-install-recommends libfcgi0ldbl mc wget curl ntp >/dev/null 2>&1
 
 # x-layer 2: system core setup related processor
 RUN set -e \
@@ -65,12 +63,13 @@ RUN set -e \
 # x-layer 5: provide new entrypoint
 COPY ./entrypoint.sh /opt/docker/entrypoint.sh
 
+# x-layer 6: add executable bit to entrypoint script
 RUN chmod +x /opt/docker/entrypoint.sh
 
-# x-layer 6: remove executors in jenkins master
+# x-layer 7: remove executors in jenkins master
 COPY ./opt/docker/master-executors.groovy /usr/share/jenkins/ref/init.groovy.d/
 
-# x-layer 7: build script cleanUp related processor
+# x-layer 8: build script cleanUp related processor
 RUN set -e \
     && sh /opt/docker/docker_cleanup_debian.sh
 
