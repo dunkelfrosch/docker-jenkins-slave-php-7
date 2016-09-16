@@ -12,6 +12,7 @@ if [ "$(whoami)" == "root" ]; then
   exec gosu jenkins /usr/local/bin/jenkins.sh "$@"
 
 else
-  # running as a unprivileged user already
-  exec /usr/local/bin/jenkins.sh "$@"
+    # running as a unprivileged user already
+    echo "permission set not necessary, jenkins ready to run  ..."
+    exec /usr/local/bin/jenkins.sh "$@"
 fi

@@ -4,7 +4,30 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![System Version](https://img.shields.io/badge/version-0.9.5-blue.svg)](VERSION)
 
-*documentation not fully done yet, will be updated soon ...*
+# Configuration on Google Container Engine
+
+authenticate your terminal against gloud service(s)
+```
+    gcloud auth login
+```
+
+Create a jenkins cluster 
+```
+    gcloud container clusters create jenkins --num-nodes 1 --machine-type g1-small
+```
+
+then run 
+```
+    gcloud container clusters get-credentials jenkins
+    kubectl config view --raw
+```
+
+then create gcloud persistence disc
+```
+    gcloud compute disks create --size 32GB kubernetes-jenkins
+```
+
+the last command will output kubernetes cluster configuration including API server URL, admin password and root certificate
 
 ## License-Term
 

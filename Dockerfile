@@ -65,6 +65,8 @@ RUN set -e \
 # x-layer 5: provide new entrypoint
 COPY ./entrypoint.sh /opt/docker/entrypoint.sh
 
+RUN chmod +x /opt/docker/entrypoint.sh
+
 # x-layer 6: remove executors in jenkins master
 COPY ./opt/docker/master-executors.groovy /usr/share/jenkins/ref/init.groovy.d/
 

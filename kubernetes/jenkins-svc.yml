@@ -1,15 +1,16 @@
 ---
   apiVersion: v1
   kind: Service
-  name: jenkins
+  metadata:
+    name: jenkins-service
     labels:
-      run: jenkins
+      app: jenkins
       tier: frontend
 
-  spec: 
+  spec:
     type: LoadBalancer
     selector: 
-      run: jenkins
+      app: jenkins
 
     ports:
       - 

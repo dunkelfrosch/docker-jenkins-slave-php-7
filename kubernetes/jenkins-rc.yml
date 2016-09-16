@@ -5,18 +5,14 @@
 ---
   apiVersion: extensions/v1beta1
   kind: Deployment
-  metadata: 
-    name: jenkins
+  metadata:
+    name: jenkins-deployment
 
   spec:
     replicas: 1
-    selector:
-      app: jenkins
-
-    template: 
-      metadata: 
-        name: jenkins
-        labels: 
+    template:
+      metadata:
+        labels:
           app: jenkins
           tier: frontend
 
