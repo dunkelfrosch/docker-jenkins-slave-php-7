@@ -40,14 +40,17 @@ ADD https://raw.githubusercontent.com/dunkelfrosch/docker-bash/master/docker_cle
 
 # x-layer 1: package manager related processor
 RUN apt-get update -qq >/dev/null 2>&1 \
-    && apt-get install -qq -y --no-install-recommends libfcgi0ldbl mc wget curl ntp >/dev/null 2>&1
+    && apt-get install -qq -y --no-install-recommends libfcgi0ldbl mc wget curl ntp sudo >/dev/null 2>&1
 
-# x-layer 2: system core setup related processor
+# x-layer 2: update jenkins sudo bound
+RUN echo "jenkins ALL=NOPASSWD: ALL" > /etc/sudoers
+
+# x-layer 3: system core setup related processor
 RUN set -e \
     && echo "${TIMEZONE}" >/etc/timezone \
     && dpkg-reconfigure tzdata >/dev/null 2>&1
 
-# x-layer 3: install gosu (simple go-based setuid+setgid+setgroups+exec)
+# x-layer 4: install gosu (simple go-based setuid+setgid+setgroups+exec)
 RUN set -e \
   && gpg --keyserver pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
   && curl -sSL -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/${_GOSU_VERSION}/gosu-$(dpkg --print-architecture)" \
@@ -56,20 +59,20 @@ RUN set -e \
   && rm /usr/local/bin/gosu.asc \
   && chmod +x /usr/local/bin/gosu
 
-# x-layer 4: install required plugins
+# x-layer 5: install required plugins
 RUN set -e \
     && /usr/local/bin/install-plugins.sh durable-task:1.12 credentials:2.1.4 kubernetes:0.8
 
-# x-layer 5: provide new entrypoint
+# x-layer 6: provide new entrypoint
 COPY ./entrypoint.sh /opt/docker/entrypoint.sh
 
-# x-layer 6: add executable bit to entrypoint script
+# x-layer 7: add executable bit to entrypoint script
 RUN chmod +x /opt/docker/entrypoint.sh
 
-# x-layer 7: remove executors in jenkins master
+# x-layer 8: remove executors in jenkins master
 COPY ./opt/docker/master-executors.groovy /usr/share/jenkins/ref/init.groovy.d/
 
-# x-layer 8: build script cleanUp related processor
+# x-layer 9: build script cleanUp related processor
 RUN set -e \
     && sh /opt/docker/docker_cleanup_debian.sh
 
