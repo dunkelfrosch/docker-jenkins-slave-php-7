@@ -19,9 +19,6 @@ LABEL com.container.vendor="dunkelfrosch impersonate" \
       img.name="local/df/service/jenkins/php" \
       img.description="jenkins ci service image for dynamic slave build using kubernetes"
 
-# init locale
-RUN locale-gen en_US.UTF-8
-
 # setup some system required environment variables
 ENV TIMEZONE           "Europe/Berlin"
 ENV TERM                xterm-color
