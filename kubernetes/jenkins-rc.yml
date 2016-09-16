@@ -1,0 +1,50 @@
+#
+# http://kubernetes.io/docs/user-guide/deployments/
+# http://kubernetes.io/docs/user-guide/replication-controller/
+#
+---
+  apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata: 
+    name: jenkins
+
+  spec:
+    replicas: 1
+    selector:
+      app: jenkins
+
+    template: 
+      metadata: 
+        name: jenkins
+        labels: 
+          app: jenkins
+          tier: frontend
+
+      spec: 
+        containers: 
+          - name: jenkins
+            image: dunkelfrosch/docker-jenkins-php
+
+            securityContext:
+              privileged: true
+
+            ports:
+              - containerPort: 8080
+              - containerPort: 50000
+
+            volumeMounts:
+              - name: jenkins-data
+                mountPath: /var/jenkins_home
+
+            livenessProbe:
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+              httpGet:
+                path: /login
+                port: 8080
+
+        volumes:
+          - name: jenkins-data
+            gcePersistentDisk:
+              pdName: kubernetes-jenkins
+              fsType: ext4
