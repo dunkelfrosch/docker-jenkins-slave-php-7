@@ -1,33 +1,13 @@
-# Jenkins 2.7.3 PHP/CI
+# JNLP Slave for Jenkins - PHP 7.0.11
 ## provide dynamic slaves in a Kubernetes/Docker environment
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![System Version](https://img.shields.io/badge/version-0.9.5-blue.svg)](VERSION)
 
-# Configuration on Google Container Engine
+This repository will hold our jnlp slave docker image for php 7.0.11 related CI processes and will be part of our kubernetes jenkins cluster experimental workload. Use this image for all php related build processes you want to call inside our gcloud kubernetes cluster jenkins definition.
+There will be additional images available soon to fulfill additional build requirements (e.g. other php versions or other language builds like python, go, erlang etc). This Repository based on two open source images [docker-hub/php:7.0.11](https://hub.docker.com/_/php/) and [docker-hub/jenkinsci/jnlp-slave](https://hub.docker.com/r/jenkinsci/jnlp-slave/).
 
-authenticate your terminal against gloud service(s)
-```
-    gcloud auth login
-```
-
-Create a jenkins cluster 
-```
-    gcloud container clusters create jenkins --num-nodes 1 --machine-type g1-small
-```
-
-then run 
-```
-    gcloud container clusters get-credentials jenkins
-    kubectl config view --raw
-```
-
-then create gcloud persistence disc
-```
-    gcloud compute disks create --size 32GB kubernetes-jenkins
-```
-
-the last command will output kubernetes cluster configuration including API server URL, admin password and root certificate
+*documentation isn't fully done yet, updates will fly into within the next days*
 
 ## License-Term
 
