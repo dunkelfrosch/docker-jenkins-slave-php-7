@@ -5,7 +5,7 @@
 # OS/CORE  : debian:8
 # SERVICES : jenkins jnkp slave 2.7.4
 #
-# VERSION 0.9.5
+# VERSION 0.9.6
 #
 
 FROM jenkinsci/jnlp-slave
@@ -15,7 +15,7 @@ LABEL com.container.vendor="dunkelfrosch impersonate" \
       com.container.service="df/service/jenkins/php" \
       com.container.priority="1" \
       com.container.project="df-service-jenkins-php-slave" \
-      img.version="0.9.5" \
+      img.version="0.9.6" \
       img.name="local/df/service/jenkins/slave/php/7" \
       img.description="jenkins ci slave service (jnlp) image for dynamic slave build using kubernetes"
 
@@ -59,7 +59,7 @@ RUN apt-get update -qq >/dev/null 2>&1 \
     &&  apt-get install -qq -y \
         libfcgi0ldbl mc wget curl ntp sudo \
 		$PHPIZE_DEPS \
-		ca-certificates libedit2 libsqlite3-0 libxml2 xz-utils >/dev/null 2>&1
+		ca-certificates librecode0 libedit2 libsqlite3-0 libxml2 xz-utils apt-utils >/dev/null 2>&1
 
 # x-layer 2: prepare php source compilation and add jenkins user to sudo group
 RUN set -xe \
@@ -87,6 +87,11 @@ RUN set -xe \
 		libsqlite3-dev \
 		libssl-dev \
 		libxml2-dev \
+		zlib1g-dev \
+        libreadline6-dev \
+        librecode-dev \
+        libmcrypt-dev \
+        xz-utils \
 	" \
 	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
 	\
@@ -95,20 +100,17 @@ RUN set -xe \
 	&& ./configure \
 		--with-config-file-path="$PHP_INI_DIR" \
 		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-		\
+		--with-zlib-dir=/usr \
 		--disable-cgi \
-		\
-# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
 		--enable-ftp \
-# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
-# --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
 		--enable-mysqlnd \
-		\
 		--with-curl \
 		--with-libedit \
 		--with-openssl \
 		--with-zlib \
+        --with-readline \
+        --with-recode \
 		\
 		$PHP_EXTRA_CONFIGURE_ARGS \
 	&& make -j"$(nproc)" \
@@ -122,12 +124,22 @@ RUN set -xe \
 # x-layer 5: copy additional php source tools to accessable point inside target container
 COPY docker-php-ext-* /usr/local/bin/
 
-# x-layer 6: system core setup related processor
+# x-layer 6: set permission base to build/install helper scripts
+RUN chmod +x /usr/local/bin/docker-php-ext-*
+
+# x-layer 8: install extension package dependencies and additional extensions for this slave node
+RUN set -e \
+    && apt-get update -qq && apt-get install -y --no-install-recommends apt-utils xz-utils libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng12-dev libssl-dev libcurl4-openssl-dev libsasl2-dev libicu-dev \
+    && docker-php-ext-install iconv mcrypt intl mbstring ctype zip \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install gd
+
+# x-layer 9: system core setup related processor
 RUN set -e \
     && echo "${TIMEZONE}" >/etc/timezone \
     && dpkg-reconfigure tzdata >/dev/null 2>&1
 
-# x-layer 7: build script cleanUp related processor
+# x-layer 10: build script cleanUp related processor
 RUN set -e \
     && sh /opt/docker/docker_cleanup_debian.sh
 
