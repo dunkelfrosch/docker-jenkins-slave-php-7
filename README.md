@@ -2,7 +2,7 @@
 ## provide dynamic slaves in a Kubernetes/Docker environment
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
-[![System Version](https://img.shields.io/badge/version-0.9.5-blue.svg)](VERSION)
+[![System Version](https://img.shields.io/badge/version-0.9.6-blue.svg)](VERSION)
 
 This repository will hold our jnlp slave docker image for php 7.0.11 related CI processes and will be part of our kubernetes jenkins cluster experimental workload. Use this image for all php related build processes you want to call inside our gcloud kubernetes cluster jenkins definition.
 There will be additional images available soon to fulfill additional build requirements (e.g. other php versions or other language builds like python, go, erlang etc). This Repository based on two open source images [docker-hub/php:7.0.11](https://hub.docker.com/_/php/) and [docker-hub/jenkinsci/jnlp-slave](https://hub.docker.com/r/jenkinsci/jnlp-slave/).
