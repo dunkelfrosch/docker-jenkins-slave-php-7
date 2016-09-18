@@ -63,7 +63,7 @@ RUN apt-get update -qq >/dev/null 2>&1 \
 
 # x-layer 2: prepare php source compilation and add jenkins user to sudo group
 RUN set -xe \
-    echo "jenkins ALL=NOPASSWD: ALL" > /etc/sudoers \
+    echo "jenkins ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers \
 	&& cd /usr/src \
 	&& curl -fSL "https://secure.php.net/get/$PHP_FILENAME/from/this/mirror" -o php.tar.xz \
 	&& echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c - \
@@ -143,7 +143,7 @@ RUN set -e \
 RUN set -e \
     && sh /opt/docker/docker_cleanup_debian.sh
 
-USER jenkins
+# USER jenkins
 
 #
 # -- EODEF --
