@@ -46,6 +46,8 @@ ENV PHPIZE_DEPS \
 		pkg-config \
 		re2c
 
+USER root
+
 # prepare main remote docker helper script path
 RUN mkdir -p /opt/docker $PHP_INI_DIR/conf.d
 
@@ -59,6 +61,7 @@ RUN apt-get update -qq >/dev/null 2>&1 \
 		$PHPIZE_DEPS \
 		ca-certificates libedit2 libsqlite3-0 libxml2 xz-utils >/dev/null 2>&1
 
+# x-layer 2: prepare php source compilation and add jenkins user to sudo group
 RUN set -xe \
     echo "jenkins ALL=NOPASSWD: ALL" > /etc/sudoers \
 	&& cd /usr/src \
@@ -72,8 +75,10 @@ RUN set -xe \
 	&& gpg --batch --verify php.tar.xz.asc php.tar.xz \
 	&& rm -r "$GNUPGHOME"
 
+# x-layer 3: copy installation tools for php into target container
 COPY docker-php-source /usr/local/bin/
 
+# x-layer 4: install all required sources and tools using apt-*
 RUN set -xe \
 	&& buildDeps=" \
 		$PHP_EXTRA_BUILD_DEPS \
@@ -114,14 +119,15 @@ RUN set -xe \
 	\
 	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps
 
+# x-layer 5: copy additional php source tools to accessable point inside target container
 COPY docker-php-ext-* /usr/local/bin/
 
-# x-layer 3: system core setup related processor
+# x-layer 6: system core setup related processor
 RUN set -e \
     && echo "${TIMEZONE}" >/etc/timezone \
     && dpkg-reconfigure tzdata >/dev/null 2>&1
 
-# x-layer 4: build script cleanUp related processor
+# x-layer 7: build script cleanUp related processor
 RUN set -e \
     && sh /opt/docker/docker_cleanup_debian.sh
 
