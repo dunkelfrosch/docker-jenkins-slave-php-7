@@ -131,6 +131,8 @@ RUN set -e \
 RUN set -e \
     && sh /opt/docker/docker_cleanup_debian.sh
 
+USER jenkins
+
 #
 # -- EODEF --
 #
