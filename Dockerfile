@@ -17,7 +17,7 @@ LABEL com.container.vendor="dunkelfrosch impersonate" \
       com.container.project="df-service-jenkins-php-slave" \
       img.version="0.9.5" \
       img.name="local/df/service/jenkins/slave/php/7" \
-      img.description="jenkins ci service image for dynamic slave build using kubernetes"
+      img.description="jenkins ci slave service (jnlp) image for dynamic slave build using kubernetes"
 
 # setup some system required environment variables
 ENV TIMEZONE           "Europe/Berlin"
