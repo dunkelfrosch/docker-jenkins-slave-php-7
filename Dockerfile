@@ -46,6 +46,7 @@ ENV PHPIZE_DEPS \
 		pkg-config \
 		re2c
 
+# reset default user from jenkins to root for upcoming steps
 USER root
 
 # prepare main remote docker helper script path
@@ -89,6 +90,7 @@ RUN set -xe \
 		libxml2-dev \
 		zlib1g-dev \
         libreadline6-dev \
+        libturbojpeg-dev \
         librecode-dev \
         libmcrypt-dev \
         xz-utils \
@@ -129,8 +131,13 @@ RUN chmod +x /usr/local/bin/docker-php-ext-*
 
 # x-layer 8: install extension package dependencies and additional extensions for this slave node
 RUN set -e \
-    && apt-get update -qq && apt-get install -y --no-install-recommends apt-utils xz-utils libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng12-dev libssl-dev libcurl4-openssl-dev libsasl2-dev libicu-dev \
-    && docker-php-ext-install iconv mcrypt intl mbstring ctype zip exif \
+    && apt-get update -qq && apt-get install -y --no-install-recommends apt-utils xz-utils libfreetype6-dev libjpeg62-turbo libmcrypt-dev libpng12-dev libssl-dev libcurl4-openssl-dev libsasl2-dev libicu-dev libjpeg-dev
+
+RUN set -e \
+    && docker-php-ext-install pdo pdo_mysql
+
+RUN set -e \
+    && docker-php-ext-install iconv mcrypt intl mbstring ctype zip exif pdo pdo_mysql \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd
 
