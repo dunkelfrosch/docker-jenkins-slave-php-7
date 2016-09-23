@@ -130,7 +130,7 @@ RUN chmod +x /usr/local/bin/docker-php-ext-*
 # x-layer 8: install extension package dependencies and additional extensions for this slave node
 RUN set -e \
     && apt-get update -qq && apt-get install -y --no-install-recommends apt-utils xz-utils libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng12-dev libssl-dev libcurl4-openssl-dev libsasl2-dev libicu-dev \
-    && docker-php-ext-install iconv mcrypt intl mbstring ctype zip \
+    && docker-php-ext-install iconv mcrypt intl mbstring ctype zip exif \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd
 
